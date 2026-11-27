@@ -427,6 +427,7 @@
     </style>
 </head>
 <body class="min-h-screen relative antialiased selection:bg-rosegold-200 selection:text-rosegold-700">
+    <audio id="bgMusic" src="lagu.mp3" loop preload="auto"></audio>
 
     <!-- Floating Ambient Particles Container -->
     <div id="bokehContainer" class="fixed inset-0 pointer-events-none overflow-hidden z-0"></div>
@@ -639,9 +640,9 @@
             <div class="max-w-6xl mx-auto px-4 mb-4 flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <i data-lucide="film" class="w-4 h-4 text-rosegold-500"></i>
-                    <h3 class="font-serif text-lg sm:text-xl text-rosegold-700 font-semibold">Jejak Momen Bahagia</h3>
+                    <h3 class="font-serif text-lg sm:text-xl text-rosegold-700 font-semibold">Tentangmu</h3>
                 </div>
-                <span class="text-xs text-rosegold-500 italic">Arahkan kursor untuk berhenti sejenak</span>
+                <span class="text-xs text-rosegold-500 italic">Arahkan kursor untuk melihat kecantikanmu</span>
             </div>
 
             <div class="marquee-container py-3">
@@ -660,49 +661,23 @@
         // Initialize Lucide Icons
         lucide.createIcons();
 
-        // =========================================================================
-        // 2. WEB AUDIO API: FESTIVE & LIVELY "HAPPY BIRTHDAY TO YOU" ARRANGEMENT
-        // =========================================================================
-        let audioCtx = null;
-        let isPlayingMusic = false;
-        let melodyTimeout = null;
-        let activeAudioNodes = [];
+        function startBirthdayMelody() {
+       const audio = document.getElementById('bgMusic');
+       if (audio) {
+           audio.play().catch(err => console.warn(err));
+           isPlayingMusic = true;
+           updateAudioUI();
+       }
+   }
 
-        // Tempo lebih ceria & meriah dilengkapi akor (chords) dan nada harmoni
-        const happyBirthdayNotes = [
-            // "Hap-py Birth-day to you" (Chord: C -> G)
-            { freq: 261.63, dur: 0.26, chord: [130.81, 261.63, 329.63, 392.00] },
-            { freq: 261.63, dur: 0.20 },
-            { freq: 293.66, dur: 0.44, chord: [130.81, 261.63, 329.63, 392.00] },
-            { freq: 261.63, dur: 0.44, chord: [130.81, 261.63, 329.63, 392.00] },
-            { freq: 349.23, dur: 0.44, chord: [196.00, 246.94, 293.66, 392.00] },
-            { freq: 329.63, dur: 0.85, chord: [196.00, 246.94, 293.66, 392.00], sparkle: true },
-
-            // "Hap-py Birth-day to you" (Chord: G -> C)
-            { freq: 261.63, dur: 0.26, chord: [196.00, 246.94, 293.66] },
-            { freq: 261.63, dur: 0.20 },
-            { freq: 293.66, dur: 0.44, chord: [196.00, 246.94, 293.66, 392.00] },
-            { freq: 261.63, dur: 0.44, chord: [196.00, 246.94, 293.66, 392.00] },
-            { freq: 392.00, dur: 0.44, chord: [130.81, 261.63, 329.63, 392.00] },
-            { freq: 349.23, dur: 0.85, chord: [130.81, 261.63, 329.63, 392.00], sparkle: true },
-
-            // "Hap-py Birth-day dear Sin-dy" (Chord: C -> F)
-            { freq: 261.63, dur: 0.26, chord: [130.81, 261.63, 329.63] },
-            { freq: 261.63, dur: 0.20 },
-            { freq: 523.25, dur: 0.44, chord: [130.81, 261.63, 329.63, 523.25], sparkle: true },
-            { freq: 440.00, dur: 0.44, chord: [174.61, 261.63, 349.23, 440.00] },
-            { freq: 349.23, dur: 0.44, chord: [174.61, 261.63, 349.23, 440.00] },
-            { freq: 329.63, dur: 0.44, chord: [174.61, 261.63, 349.23] },
-            { freq: 293.66, dur: 0.85, chord: [146.83, 220.00, 293.66, 349.23], sparkle: true },
-
-            // "Hap-py Birth-day to you!" (Chord: F -> C -> G7 -> C Finale)
-            { freq: 466.16, dur: 0.26, chord: [174.61, 261.63, 349.23] },
-            { freq: 466.16, dur: 0.20 },
-            { freq: 440.00, dur: 0.44, chord: [174.61, 261.63, 349.23, 440.00] },
-            { freq: 349.23, dur: 0.44, chord: [130.81, 261.63, 329.63, 392.00] },
-            { freq: 392.00, dur: 0.48, chord: [196.00, 246.94, 349.23, 392.00] },
-            { freq: 349.23, dur: 1.25, chord: [130.81, 261.63, 329.63, 392.00, 523.25], finale: true }
-        ];
+   function stopBirthdayMelody() {
+       const audio = document.getElementById('bgMusic');
+       if (audio) {
+           audio.pause();
+           isPlayingMusic = false;
+           updateAudioUI();
+       }
+   }
 
         function playFestiveNote(note, startTime) {
             if (!audioCtx) return;
