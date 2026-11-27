@@ -427,7 +427,8 @@
     </style>
 </head>
 <body class="min-h-screen relative antialiased selection:bg-rosegold-200 selection:text-rosegold-700">
-    <audio id="bgMusic" src="lagu.mp3" loop preload="auto"></audio>
+    <!-- Elemen Audio MP3 Background -->
+    <audio id="bgMusic" src="lagu.mp3" loop preload="auto" playsinline></audio>
 
     <!-- Floating Ambient Particles Container -->
     <div id="bokehContainer" class="fixed inset-0 pointer-events-none overflow-hidden z-0"></div>
@@ -640,9 +641,9 @@
             <div class="max-w-6xl mx-auto px-4 mb-4 flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <i data-lucide="film" class="w-4 h-4 text-rosegold-500"></i>
-                    <h3 class="font-serif text-lg sm:text-xl text-rosegold-700 font-semibold">Tentangmu</h3>
+                    <h3 class="font-serif text-lg sm:text-xl text-rosegold-700 font-semibold">Jejak Momen Bahagia</h3>
                 </div>
-                <span class="text-xs text-rosegold-500 italic">Arahkan kursor untuk melihat kecantikanmu</span>
+                <span class="text-xs text-rosegold-500 italic">Arahkan kursor untuk berhenti sejenak</span>
             </div>
 
             <div class="marquee-container py-3">
@@ -661,199 +662,110 @@
         // Initialize Lucide Icons
         lucide.createIcons();
 
-        function startBirthdayMelody() {
-       const audio = document.getElementById('bgMusic');
-       if (audio) {
-           audio.play().catch(err => console.warn(err));
-           isPlayingMusic = true;
-           updateAudioUI();
-       }
-   }
+        // =========================================================================
+        // 2. MP3 BACKGROUND MUSIC PLAYER (lagu.mp3) + FALLBACK SYNTH MELODY
+        // =========================================================================
+        let isPlayingMusic = false;
+        let fallbackAudioCtx = null;
+        let fallbackTimer = null;
 
-   function stopBirthdayMelody() {
-       const audio = document.getElementById('bgMusic');
-       if (audio) {
-           audio.pause();
-           isPlayingMusic = false;
-           updateAudioUI();
-       }
-   }
-
-        function playFestiveNote(note, startTime) {
-            if (!audioCtx) return;
-            const { freq, dur, chord, sparkle, finale } = note;
-
-            // 1. Melodi Utama (Bright Piano / Celesta Bell)
-            const leadOsc = audioCtx.createOscillator();
-            const octaveOsc = audioCtx.createOscillator();
-            const bellOsc = audioCtx.createOscillator();
-            const leadGain = audioCtx.createGain();
-
-            leadOsc.type = 'triangle';
-            leadOsc.frequency.setValueAtTime(freq, startTime);
-
-            octaveOsc.type = 'sine';
-            octaveOsc.frequency.setValueAtTime(freq * 2, startTime);
-
-            bellOsc.type = 'sine';
-            bellOsc.frequency.setValueAtTime(freq * 3, startTime);
-
-            const octaveGain = audioCtx.createGain();
-            octaveGain.gain.setValueAtTime(0.14, startTime);
-            octaveGain.gain.exponentialRampToValueAtTime(0.0001, startTime + dur * 0.9);
-
-            const bellGain = audioCtx.createGain();
-            bellGain.gain.setValueAtTime(0.05, startTime);
-            bellGain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.18);
-
-            leadGain.gain.setValueAtTime(0.001, startTime);
-            leadGain.gain.linearRampToValueAtTime(0.28, startTime + 0.02);
-            leadGain.gain.exponentialRampToValueAtTime(0.0008, startTime + dur * 1.15);
-
-            leadOsc.connect(leadGain);
-            octaveOsc.connect(octaveGain);
-            bellOsc.connect(bellGain);
-            octaveGain.connect(leadGain);
-            bellGain.connect(leadGain);
-            leadGain.connect(audioCtx.destination);
-
-            leadOsc.start(startTime);
-            octaveOsc.start(startTime);
-            bellOsc.start(startTime);
-            leadOsc.stop(startTime + dur * 1.2);
-            octaveOsc.stop(startTime + dur * 1.2);
-            bellOsc.stop(startTime + 0.2);
-
-            activeAudioNodes.push(leadOsc, octaveOsc, bellOsc);
-
-            // 2. Iringan Akor & Bass (Warm Festive Accompaniment)
-            if (chord && chord.length > 0) {
-                chord.forEach((cFreq, idx) => {
-                    const cOsc = audioCtx.createOscillator();
-                    const cGain = audioCtx.createGain();
-                    const strumOffset = idx * 0.018; // efek petikan ringan yang hidup
-
-                    cOsc.type = idx === 0 ? 'triangle' : 'sine';
-                    cOsc.frequency.setValueAtTime(cFreq, startTime + strumOffset);
-
-                    const peakVol = idx === 0 ? 0.14 : 0.075;
-                    cGain.gain.setValueAtTime(0.001, startTime + strumOffset);
-                    cGain.gain.linearRampToValueAtTime(peakVol, startTime + strumOffset + 0.025);
-                    cGain.gain.exponentialRampToValueAtTime(0.0005, startTime + dur * 1.25);
-
-                    cOsc.connect(cGain);
-                    cGain.connect(audioCtx.destination);
-
-                    cOsc.start(startTime + strumOffset);
-                    cOsc.stop(startTime + dur * 1.3);
-                    activeAudioNodes.push(cOsc);
-                });
-            }
-
-            // 3. Kilauan Lonceng Arpeggio di Akhir Baris (Sparkle Chimes)
-            if (sparkle || finale) {
-                const chimeNotes = finale
-                    ? [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98]
-                    : [783.99, 1046.50, 1318.51];
-
-                chimeNotes.forEach((chimeFreq, idx) => {
-                    const chOsc = audioCtx.createOscillator();
-                    const chGain = audioCtx.createGain();
-                    const chStart = startTime + 0.12 + idx * 0.075;
-
-                    chOsc.type = 'sine';
-                    chOsc.frequency.setValueAtTime(chimeFreq, chStart);
-
-                    chGain.gain.setValueAtTime(0.001, chStart);
-                    chGain.gain.linearRampToValueAtTime(0.09, chStart + 0.015);
-                    chGain.gain.exponentialRampToValueAtTime(0.0001, chStart + 0.45);
-
-                    chOsc.connect(chGain);
-                    chGain.connect(audioCtx.destination);
-
-                    chOsc.start(chStart);
-                    chOsc.stop(chStart + 0.48);
-                    activeAudioNodes.push(chOsc);
-                });
-            }
-
-            // 4. Efek Tepuk Tangan Meriah di Puncak Akhir Lagu
-            if (finale) {
-                playCelebrationClaps(startTime + 0.25);
-            }
-        }
-
-        function playCelebrationClaps(startTime) {
-            if (!audioCtx) return;
-            const clapOffsets = [0, 0.16, 0.32, 0.48, 0.64, 0.82];
-            clapOffsets.forEach((offset, idx) => {
-                const bufferSize = Math.floor(audioCtx.sampleRate * 0.12);
-                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-                const data = buffer.getChannelData(0);
-                for (let i = 0; i < bufferSize; i++) {
-                    data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (audioCtx.sampleRate * 0.028));
-                }
-
-                const noise = audioCtx.createBufferSource();
-                noise.buffer = buffer;
-
-                const filter = audioCtx.createBiquadFilter();
-                filter.type = 'bandpass';
-                filter.frequency.value = 1150 + (idx % 2) * 200;
-                filter.Q.value = 1.4;
-
-                const clapGain = audioCtx.createGain();
-                clapGain.gain.setValueAtTime(0.11, startTime + offset);
-                clapGain.gain.exponentialRampToValueAtTime(0.001, startTime + offset + 0.11);
-
-                noise.connect(filter);
-                filter.connect(clapGain);
-                clapGain.connect(audioCtx.destination);
-
-                noise.start(startTime + offset);
-                activeAudioNodes.push(noise);
-            });
-        }
-
-        function startBirthdayMelody() {
+        function playFallbackChime() {
             try {
-                if (!audioCtx) {
-                    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-                    audioCtx = new AudioContextClass();
+                if (!fallbackAudioCtx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    fallbackAudioCtx = new AudioCtx();
                 }
-                if (audioCtx.state === 'suspended') {
-                    audioCtx.resume();
+                if (fallbackAudioCtx.state === 'suspended') {
+                    fallbackAudioCtx.resume();
                 }
+
+                const notes = [
+                    { f: 261.63, d: 0.25 }, { f: 261.63, d: 0.25 }, { f: 293.66, d: 0.5 },
+                    { f: 261.63, d: 0.5 },  { f: 349.23, d: 0.5 },  { f: 329.63, d: 0.9 },
+                    { f: 261.63, d: 0.25 }, { f: 261.63, d: 0.25 }, { f: 293.66, d: 0.5 },
+                    { f: 261.63, d: 0.5 },  { f: 392.00, d: 0.5 },  { f: 349.23, d: 0.9 },
+                    { f: 261.63, d: 0.25 }, { f: 261.63, d: 0.25 }, { f: 523.25, d: 0.5 },
+                    { f: 440.00, d: 0.5 },  { f: 349.23, d: 0.5 },  { f: 329.63, d: 0.5 },
+                    { f: 293.66, d: 0.9 },  { f: 466.16, d: 0.25 }, { f: 466.16, d: 0.25 },
+                    { f: 440.00, d: 0.5 },  { f: 349.23, d: 0.5 },  { f: 392.00, d: 0.5 },
+                    { f: 349.23, d: 1.0 }
+                ];
+
+                let t = fallbackAudioCtx.currentTime + 0.05;
+                let total = 0;
+                notes.forEach(n => {
+                    const osc = fallbackAudioCtx.createOscillator();
+                    const gain = fallbackAudioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(n.f, t);
+                    gain.gain.setValueAtTime(0.001, t);
+                    gain.gain.linearRampToValueAtTime(0.22, t + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + n.d);
+                    osc.connect(gain);
+                    gain.connect(fallbackAudioCtx.destination);
+                    osc.start(t);
+                    osc.stop(t + n.d + 0.02);
+                    t += n.d + 0.05;
+                    total += n.d + 0.05;
+                });
 
                 isPlayingMusic = true;
                 updateAudioUI();
 
-                let currentTime = audioCtx.currentTime + 0.08;
-                let totalDuration = 0;
+                fallbackTimer = setTimeout(() => {
+                    if (isPlayingMusic) playFallbackChime();
+                }, (total + 0.6) * 1000);
+            } catch (e) {
+                console.warn('Fallback audio gagal:', e);
+            }
+        }
 
-                happyBirthdayNotes.forEach(note => {
-                    playFestiveNote(note, currentTime);
-                    currentTime += note.dur + 0.04;
-                    totalDuration += note.dur + 0.04;
+        function stopFallbackChime() {
+            if (fallbackTimer) {
+                clearTimeout(fallbackTimer);
+                fallbackTimer = null;
+            }
+            if (fallbackAudioCtx && fallbackAudioCtx.state === 'running') {
+                fallbackAudioCtx.suspend();
+            }
+        }
+
+        function startBirthdayMelody() {
+            const audio = document.getElementById('bgMusic');
+            if (!audio) {
+                playFallbackChime();
+                return;
+            }
+
+            audio.muted = false;
+            audio.volume = 0.9;
+
+            // Jika file lagu.mp3 gagal dimuat (404 / belum ada), otomatis pakai melodi cadangan
+            if (audio.error) {
+                playFallbackChime();
+                return;
+            }
+
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    stopFallbackChime();
+                    isPlayingMusic = true;
+                    updateAudioUI();
+                }).catch(err => {
+                    console.warn('MP3 gagal diputar, beralih ke melodi bawaan:', err);
+                    playFallbackChime();
                 });
-
-                melodyTimeout = setTimeout(() => {
-                    if (isPlayingMusic) {
-                        startBirthdayMelody();
-                    }
-                }, (totalDuration + 0.9) * 1000);
-            } catch (err) {
-                console.warn('Web Audio API tidak didukung:', err);
             }
         }
 
         function stopBirthdayMelody() {
+            const audio = document.getElementById('bgMusic');
+            if (audio) {
+                audio.pause();
+            }
+            stopFallbackChime();
             isPlayingMusic = false;
-            if (melodyTimeout) clearTimeout(melodyTimeout);
-            activeAudioNodes.forEach(node => {
-                try { node.stop(); } catch (e) {}
-            });
-            activeAudioNodes = [];
             updateAudioUI();
         }
 
@@ -868,10 +780,29 @@
         function updateAudioUI() {
             const btn = document.getElementById('audioToggleBtn');
             if (!btn) return;
+
             btn.innerHTML = isPlayingMusic
                 ? '<i data-lucide="volume-2" class="w-4 h-4 text-rosegold-600"></i>'
                 : '<i data-lucide="volume-x" class="w-4 h-4 text-rosegold-500"></i>';
             lucide.createIcons();
+        }
+
+        // Sinkronisasi status ikon speaker dengan elemen <audio id="bgMusic">
+        const bgMusicEl = document.getElementById('bgMusic');
+        if (bgMusicEl) {
+            bgMusicEl.addEventListener('play', () => {
+                isPlayingMusic = true;
+                updateAudioUI();
+            });
+            bgMusicEl.addEventListener('pause', () => {
+                if (!fallbackTimer) {
+                    isPlayingMusic = false;
+                    updateAudioUI();
+                }
+            });
+            bgMusicEl.addEventListener('error', () => {
+                if (isPlayingMusic) playFallbackChime();
+            });
         }
 
         // =========================================================================
@@ -1001,7 +932,7 @@
             {
                 id: 0,
                 marqueeIndex: 1,
-                image: 'Polaroid 1.jpeg',
+                image: 'Polaroid 1.jpg',
                 caption: 'Di bawah teduh dedaunan dan cahaya mentari sore, siluet anggunmu menatap jauh seindah lukisan semesta'
             },
             {
@@ -1026,13 +957,13 @@
 
         let marqueePhotos = [
             { url: 'Slideshow (1).jpeg', label: 'Di balik lensa kacamata bundar itu, sorot matamu menyimpan keteduhan yang selalu membuatku betah menatapmu' },
-            { url: 'Slideshow (2).jpeg', label: 'Di bawah birunya langit dan arakan awan putih, langkah anggunmu seakan menjadi pusat dari indahnya semesta' },
+            { url: 'Slideshow (2).jpg', label: 'Di bawah birunya langit dan arakan awan putih, langkah anggunmu seakan menjadi pusat dari indahnya semesta' },
             { url: 'Slideshow (3).jpeg', label: 'Dalam balutan hitam yang menawan, setiap gerak tubuhmu memancarkan pesona yang tak pernah gagal memikat hati' },
             { url: 'Slideshow (4).jpeg', label: 'Bahkan di tengah cahaya poster bioskop, keanggunanmu tetap menjadi pemeran utama yang mencuri seluruh perhatian' },
-            { url: 'Slideshow (5).jpeg', label: 'Di bawah gemerlap panggung malam itu, paras manismu bersinar jauh lebih terang dari sorot lampu mana pun' },
-            { url: 'Slideshow (6).jpeg', label: 'Malam yang riuh terasa begitu syahdu saat menatapmu berdiri anggun dengan pesona yang menenangkan jiwa' },
-            { url: 'Slideshow (7).jpeg', label: 'Pantulan cermin itu merekam keanggunanmu yang paripurna, manis dan teduh dalam balutan hijab hitam' },
-            { url: 'Slideshow (8).jpeg', label: 'Tatapan lembut dan rona pipi manismu menjadikan momen sederhana ini terasa begitu istimewa untuk dikenang' }
+            { url: 'Slideshow (5).jpg', label: 'Di bawah gemerlap panggung malam itu, paras manismu bersinar jauh lebih terang dari sorot lampu mana pun' },
+            { url: 'Slideshow (6).jpg', label: 'Malam yang riuh terasa begitu syahdu saat menatapmu berdiri anggun dengan pesona yang menenangkan jiwa' },
+            { url: 'Slideshow (7).jpg', label: 'Pantulan cermin itu merekam keanggunanmu yang paripurna, manis dan teduh dalam balutan hijab hitam' },
+            { url: 'Slideshow (8).jpg', label: 'Tatapan lembut dan rona pipi manismu menjadikan momen sederhana ini terasa begitu istimewa untuk dikenang' }
         ];
 
         let activeUploadTarget = null;
