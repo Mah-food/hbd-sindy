@@ -661,111 +661,183 @@
         lucide.createIcons();
 
         // =========================================================================
-        // 1. AMBIENT BOKEH PARTICLES & FLOATING HEARTS GENERATOR
-        // =========================================================================
-        function createBokehParticles() {
-            const container = document.getElementById('bokehContainer');
-            if (!container) return;
-            const count = 14;
-            for (let i = 0; i < count; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'bokeh-particle';
-                const size = Math.random() * 60 + 20;
-                particle.style.width = `${size}px`;
-                particle.style.height = `${size}px`;
-                particle.style.left = `${Math.random() * 100}vw`;
-                particle.style.animationDuration = `${Math.random() * 14 + 12}s`;
-                particle.style.animationDelay = `${Math.random() * 10}s`;
-                container.appendChild(particle);
-            }
-
-            // Generate slow rising looping hearts
-            const heartColors = ['#E2B1B1', '#D18E8E', '#B76E79', '#F0C4C4', '#D4AF37'];
-            const heartCount = 22;
-            for (let i = 0; i < heartCount; i++) {
-                const heart = document.createElement('div');
-                heart.className = 'floating-heart';
-                const size = Math.random() * 18 + 12; // 12px - 30px
-                const color = heartColors[Math.floor(Math.random() * heartColors.length)];
-                const duration = Math.random() * 14 + 16; // 16s - 30s (pelan & lembut)
-                const delay = -(Math.random() * duration); // langsung tersebar merata di layar sejak awal
-                const sway = (Math.random() * 40 - 20).toFixed(0);
-                const maxOpacity = (Math.random() * 0.35 + 0.25).toFixed(2);
-
-                heart.style.left = `${Math.random() * 98}vw`;
-                heart.style.width = `${size}px`;
-                heart.style.height = `${size}px`;
-                heart.style.color = color;
-                heart.style.setProperty('--sway-x', `${sway}px`);
-                heart.style.setProperty('--heart-opacity', maxOpacity);
-                heart.style.animationDuration = `${duration}s`;
-                heart.style.animationDelay = `${delay}s`;
-
-                heart.innerHTML = `
-                    <svg viewBox="0 0 24 24" fill="currentColor" class="w-full h-full">
-                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                    </svg>
-                `;
-                container.appendChild(heart);
-            }
-        }
-        createBokehParticles();
-
-        // =========================================================================
-        // 2. WEB AUDIO API: MUSIC BOX MELODY ("HAPPY BIRTHDAY TO YOU")
+        // 2. WEB AUDIO API: FESTIVE & LIVELY "HAPPY BIRTHDAY TO YOU" ARRANGEMENT
         // =========================================================================
         let audioCtx = null;
         let isPlayingMusic = false;
         let melodyTimeout = null;
-        let activeOscillators = [];
+        let activeAudioNodes = [];
 
+        // Tempo lebih ceria & meriah dilengkapi akor (chords) dan nada harmoni
         const happyBirthdayNotes = [
-            // "Hap-py Birth-day to you"
-            { freq: 261.63, dur: 0.35 }, { freq: 261.63, dur: 0.25 }, { freq: 293.66, dur: 0.6 },
-            { freq: 261.63, dur: 0.6 },  { freq: 349.23, dur: 0.6 },  { freq: 329.63, dur: 1.1 },
-            // "Hap-py Birth-day to you"
-            { freq: 261.63, dur: 0.35 }, { freq: 261.63, dur: 0.25 }, { freq: 293.66, dur: 0.6 },
-            { freq: 261.63, dur: 0.6 },  { freq: 392.00, dur: 0.6 },  { freq: 349.23, dur: 1.1 },
-            // "Hap-py Birth-day dear [Name]"
-            { freq: 261.63, dur: 0.35 }, { freq: 261.63, dur: 0.25 }, { freq: 523.25, dur: 0.6 },
-            { freq: 440.00, dur: 0.6 },  { freq: 349.23, dur: 0.6 },  { freq: 329.63, dur: 0.6 },
-            { freq: 293.66, dur: 1.1 },
-            // "Hap-py Birth-day to you"
-            { freq: 466.16, dur: 0.35 }, { freq: 466.16, dur: 0.25 }, { freq: 440.00, dur: 0.6 },
-            { freq: 349.23, dur: 0.6 },  { freq: 392.00, dur: 0.6 },  { freq: 349.23, dur: 1.4 }
+            // "Hap-py Birth-day to you" (Chord: C -> G)
+            { freq: 261.63, dur: 0.26, chord: [130.81, 261.63, 329.63, 392.00] },
+            { freq: 261.63, dur: 0.20 },
+            { freq: 293.66, dur: 0.44, chord: [130.81, 261.63, 329.63, 392.00] },
+            { freq: 261.63, dur: 0.44, chord: [130.81, 261.63, 329.63, 392.00] },
+            { freq: 349.23, dur: 0.44, chord: [196.00, 246.94, 293.66, 392.00] },
+            { freq: 329.63, dur: 0.85, chord: [196.00, 246.94, 293.66, 392.00], sparkle: true },
+
+            // "Hap-py Birth-day to you" (Chord: G -> C)
+            { freq: 261.63, dur: 0.26, chord: [196.00, 246.94, 293.66] },
+            { freq: 261.63, dur: 0.20 },
+            { freq: 293.66, dur: 0.44, chord: [196.00, 246.94, 293.66, 392.00] },
+            { freq: 261.63, dur: 0.44, chord: [196.00, 246.94, 293.66, 392.00] },
+            { freq: 392.00, dur: 0.44, chord: [130.81, 261.63, 329.63, 392.00] },
+            { freq: 349.23, dur: 0.85, chord: [130.81, 261.63, 329.63, 392.00], sparkle: true },
+
+            // "Hap-py Birth-day dear Sin-dy" (Chord: C -> F)
+            { freq: 261.63, dur: 0.26, chord: [130.81, 261.63, 329.63] },
+            { freq: 261.63, dur: 0.20 },
+            { freq: 523.25, dur: 0.44, chord: [130.81, 261.63, 329.63, 523.25], sparkle: true },
+            { freq: 440.00, dur: 0.44, chord: [174.61, 261.63, 349.23, 440.00] },
+            { freq: 349.23, dur: 0.44, chord: [174.61, 261.63, 349.23, 440.00] },
+            { freq: 329.63, dur: 0.44, chord: [174.61, 261.63, 349.23] },
+            { freq: 293.66, dur: 0.85, chord: [146.83, 220.00, 293.66, 349.23], sparkle: true },
+
+            // "Hap-py Birth-day to you!" (Chord: F -> C -> G7 -> C Finale)
+            { freq: 466.16, dur: 0.26, chord: [174.61, 261.63, 349.23] },
+            { freq: 466.16, dur: 0.20 },
+            { freq: 440.00, dur: 0.44, chord: [174.61, 261.63, 349.23, 440.00] },
+            { freq: 349.23, dur: 0.44, chord: [130.81, 261.63, 329.63, 392.00] },
+            { freq: 392.00, dur: 0.48, chord: [196.00, 246.94, 349.23, 392.00] },
+            { freq: 349.23, dur: 1.25, chord: [130.81, 261.63, 329.63, 392.00, 523.25], finale: true }
         ];
 
-        function playMusicBoxNote(freq, startTime, duration) {
+        function playFestiveNote(note, startTime) {
             if (!audioCtx) return;
-            const osc = audioCtx.createOscillator();
-            const overtone = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
+            const { freq, dur, chord, sparkle, finale } = note;
 
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(freq, startTime);
+            // 1. Melodi Utama (Bright Piano / Celesta Bell)
+            const leadOsc = audioCtx.createOscillator();
+            const octaveOsc = audioCtx.createOscillator();
+            const bellOsc = audioCtx.createOscillator();
+            const leadGain = audioCtx.createGain();
 
-            overtone.type = 'triangle';
-            overtone.frequency.setValueAtTime(freq * 2, startTime);
+            leadOsc.type = 'triangle';
+            leadOsc.frequency.setValueAtTime(freq, startTime);
 
-            const overtoneGain = audioCtx.createGain();
-            overtoneGain.gain.setValueAtTime(0.06, startTime);
-            overtoneGain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration * 0.8);
+            octaveOsc.type = 'sine';
+            octaveOsc.frequency.setValueAtTime(freq * 2, startTime);
 
-            gainNode.gain.setValueAtTime(0.001, startTime);
-            gainNode.gain.linearRampToValueAtTime(0.22, startTime + 0.03);
-            gainNode.gain.exponentialRampToValueAtTime(0.0008, startTime + duration * 1.15);
+            bellOsc.type = 'sine';
+            bellOsc.frequency.setValueAtTime(freq * 3, startTime);
 
-            osc.connect(gainNode);
-            overtone.connect(overtoneGain);
-            overtoneGain.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
+            const octaveGain = audioCtx.createGain();
+            octaveGain.gain.setValueAtTime(0.14, startTime);
+            octaveGain.gain.exponentialRampToValueAtTime(0.0001, startTime + dur * 0.9);
 
-            osc.start(startTime);
-            overtone.start(startTime);
-            osc.stop(startTime + duration * 1.2);
-            overtone.stop(startTime + duration * 1.2);
+            const bellGain = audioCtx.createGain();
+            bellGain.gain.setValueAtTime(0.05, startTime);
+            bellGain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.18);
 
-            activeOscillators.push(osc, overtone);
+            leadGain.gain.setValueAtTime(0.001, startTime);
+            leadGain.gain.linearRampToValueAtTime(0.28, startTime + 0.02);
+            leadGain.gain.exponentialRampToValueAtTime(0.0008, startTime + dur * 1.15);
+
+            leadOsc.connect(leadGain);
+            octaveOsc.connect(octaveGain);
+            bellOsc.connect(bellGain);
+            octaveGain.connect(leadGain);
+            bellGain.connect(leadGain);
+            leadGain.connect(audioCtx.destination);
+
+            leadOsc.start(startTime);
+            octaveOsc.start(startTime);
+            bellOsc.start(startTime);
+            leadOsc.stop(startTime + dur * 1.2);
+            octaveOsc.stop(startTime + dur * 1.2);
+            bellOsc.stop(startTime + 0.2);
+
+            activeAudioNodes.push(leadOsc, octaveOsc, bellOsc);
+
+            // 2. Iringan Akor & Bass (Warm Festive Accompaniment)
+            if (chord && chord.length > 0) {
+                chord.forEach((cFreq, idx) => {
+                    const cOsc = audioCtx.createOscillator();
+                    const cGain = audioCtx.createGain();
+                    const strumOffset = idx * 0.018; // efek petikan ringan yang hidup
+
+                    cOsc.type = idx === 0 ? 'triangle' : 'sine';
+                    cOsc.frequency.setValueAtTime(cFreq, startTime + strumOffset);
+
+                    const peakVol = idx === 0 ? 0.14 : 0.075;
+                    cGain.gain.setValueAtTime(0.001, startTime + strumOffset);
+                    cGain.gain.linearRampToValueAtTime(peakVol, startTime + strumOffset + 0.025);
+                    cGain.gain.exponentialRampToValueAtTime(0.0005, startTime + dur * 1.25);
+
+                    cOsc.connect(cGain);
+                    cGain.connect(audioCtx.destination);
+
+                    cOsc.start(startTime + strumOffset);
+                    cOsc.stop(startTime + dur * 1.3);
+                    activeAudioNodes.push(cOsc);
+                });
+            }
+
+            // 3. Kilauan Lonceng Arpeggio di Akhir Baris (Sparkle Chimes)
+            if (sparkle || finale) {
+                const chimeNotes = finale
+                    ? [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98]
+                    : [783.99, 1046.50, 1318.51];
+
+                chimeNotes.forEach((chimeFreq, idx) => {
+                    const chOsc = audioCtx.createOscillator();
+                    const chGain = audioCtx.createGain();
+                    const chStart = startTime + 0.12 + idx * 0.075;
+
+                    chOsc.type = 'sine';
+                    chOsc.frequency.setValueAtTime(chimeFreq, chStart);
+
+                    chGain.gain.setValueAtTime(0.001, chStart);
+                    chGain.gain.linearRampToValueAtTime(0.09, chStart + 0.015);
+                    chGain.gain.exponentialRampToValueAtTime(0.0001, chStart + 0.45);
+
+                    chOsc.connect(chGain);
+                    chGain.connect(audioCtx.destination);
+
+                    chOsc.start(chStart);
+                    chOsc.stop(chStart + 0.48);
+                    activeAudioNodes.push(chOsc);
+                });
+            }
+
+            // 4. Efek Tepuk Tangan Meriah di Puncak Akhir Lagu
+            if (finale) {
+                playCelebrationClaps(startTime + 0.25);
+            }
+        }
+
+        function playCelebrationClaps(startTime) {
+            if (!audioCtx) return;
+            const clapOffsets = [0, 0.16, 0.32, 0.48, 0.64, 0.82];
+            clapOffsets.forEach((offset, idx) => {
+                const bufferSize = Math.floor(audioCtx.sampleRate * 0.12);
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (audioCtx.sampleRate * 0.028));
+                }
+
+                const noise = audioCtx.createBufferSource();
+                noise.buffer = buffer;
+
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'bandpass';
+                filter.frequency.value = 1150 + (idx % 2) * 200;
+                filter.Q.value = 1.4;
+
+                const clapGain = audioCtx.createGain();
+                clapGain.gain.setValueAtTime(0.11, startTime + offset);
+                clapGain.gain.exponentialRampToValueAtTime(0.001, startTime + offset + 0.11);
+
+                noise.connect(filter);
+                filter.connect(clapGain);
+                clapGain.connect(audioCtx.destination);
+
+                noise.start(startTime + offset);
+                activeAudioNodes.push(noise);
+            });
         }
 
         function startBirthdayMelody() {
@@ -781,20 +853,20 @@
                 isPlayingMusic = true;
                 updateAudioUI();
 
-                let currentTime = audioCtx.currentTime + 0.1;
+                let currentTime = audioCtx.currentTime + 0.08;
                 let totalDuration = 0;
 
                 happyBirthdayNotes.forEach(note => {
-                    playMusicBoxNote(note.freq, currentTime, note.dur);
-                    currentTime += note.dur + 0.06;
-                    totalDuration += note.dur + 0.06;
+                    playFestiveNote(note, currentTime);
+                    currentTime += note.dur + 0.04;
+                    totalDuration += note.dur + 0.04;
                 });
 
                 melodyTimeout = setTimeout(() => {
                     if (isPlayingMusic) {
                         startBirthdayMelody();
                     }
-                }, (totalDuration + 1.2) * 1000);
+                }, (totalDuration + 0.9) * 1000);
             } catch (err) {
                 console.warn('Web Audio API tidak didukung:', err);
             }
@@ -803,10 +875,10 @@
         function stopBirthdayMelody() {
             isPlayingMusic = false;
             if (melodyTimeout) clearTimeout(melodyTimeout);
-            activeOscillators.forEach(osc => {
-                try { osc.stop(); } catch (e) {}
+            activeAudioNodes.forEach(node => {
+                try { node.stop(); } catch (e) {}
             });
-            activeOscillators = [];
+            activeAudioNodes = [];
             updateAudioUI();
         }
 
@@ -989,4 +1061,73 @@
         ];
 
         let activeUploadTarget = null;
-// ... existing code ... -->
+
+        // =========================================================================
+        // 5. RENDER POLAROID CARDS & MARQUEE FILMSTRIP
+        // =========================================================================
+        function renderPolaroidCards() {
+            const grid = document.getElementById('polaroidGrid');
+            if (!grid) return;
+
+            grid.innerHTML = featuredMemories.map((item, idx) => {
+                const tiltClass = idx % 2 === 0 ? '-rotate-1' : 'rotate-1';
+                return `
+                    <div class="polaroid-card ${tiltClass} bg-white p-3.5 pb-6 rounded-2xl shadow-[0_14px_30px_-8px_rgba(154,84,95,0.18)] border border-rosegold-100 flex flex-col">
+                        <div class="relative w-full aspect-[3/4] rounded-xl overflow-hidden bg-cream-100 mb-4">
+                            <img src="${item.image}" alt="Kenangan ${idx + 1}"
+                                 onerror="this.src='https://placehold.co/600x800/F9ECEC/9A545F?text=Foto+${idx + 1}'"
+                                 class="w-full h-full object-cover object-top transition-transform duration-700 hover:scale-105">
+                        </div>
+                        <div class="flex-1 flex items-center justify-center px-2 text-center">
+                            <p class="font-signature text-[25px] sm:text-[26px] leading-[1.3] text-rosegold-700">
+                                "${item.caption}"
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderMarquee() {
+            const track = document.getElementById('marqueeTrack');
+            if (!track) return;
+
+            // Duplikasi array agar pergerakan marquee looping mulus tanpa putus
+            const loopedItems = [...marqueePhotos, ...marqueePhotos];
+
+            track.innerHTML = loopedItems.map((photo, idx) => `
+                <div class="w-52 sm:w-60 shrink-0 bg-white p-2.5 pb-4 rounded-2xl shadow-md border border-rosegold-100/90 flex flex-col transition-transform duration-300 hover:-translate-y-1.5">
+                    <div class="w-full aspect-[3/4] rounded-xl overflow-hidden bg-cream-100 mb-2.5">
+                        <img src="${photo.url}" alt="Momen Bahagia ${(idx % marqueePhotos.length) + 1}"
+                             onerror="this.src='https://placehold.co/450x600/F9ECEC/9A545F?text=Foto'"
+                             class="w-full h-full object-cover object-top">
+                    </div>
+                    <p class="font-script italic text-center text-xs sm:text-[13px] leading-snug text-rosegold-700 px-1.5 line-clamp-3">
+                        "${photo.label}"
+                    </p>
+                </div>
+            `).join('');
+        }
+
+        function handleSinglePhotoUpload(event) {
+            const file = event.target.files[0];
+            if (!file || activeUploadTarget === null) return;
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                featuredMemories[activeUploadTarget].image = e.target.result;
+                renderPolaroidCards();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Jalankan render galeri saat halaman selesai dimuat
+        window.addEventListener('DOMContentLoaded', () => {
+            renderPolaroidCards();
+            renderMarquee();
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
+    </script>
+</body>
+</html>
