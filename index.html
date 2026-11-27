@@ -434,10 +434,12 @@
     <div id="bokehContainer" class="fixed inset-0 pointer-events-none overflow-hidden z-0"></div>
 
     <!-- Floating Top Controls (Audio Toggle Only) -->
-    <div class="fixed top-4 right-4 z-50 flex items-center gap-2.5">
-        <button id="audioToggleBtn" onclick="toggleAudio()" title="Putar / Hentikan Musik"
-            class="bg-white/80 hover:bg-white backdrop-blur-md text-rosegold-600 border border-rosegold-200 shadow-sm p-2.5 rounded-full transition-all hover:shadow-md flex items-center justify-center">
-            <i id="audioIcon" data-lucide="volume-x" class="w-4 h-4 text-rosegold-500"></i>
+    <div class="fixed top-4 right-4 z-[9999] flex items-center gap-2.5">
+        <button id="audioToggleBtn" type="button" onclick="toggleAudio()" title="Putar / Hentikan Musik"
+            class="cursor-pointer bg-white/95 hover:bg-white backdrop-blur-md text-rosegold-600 border border-rosegold-200 shadow-md p-3 rounded-full transition-all hover:scale-105 active:scale-95 flex items-center justify-center">
+            <span id="audioIconWrapper" class="flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rosegold-500"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><line x1="22" x2="16" y1="9" y2="15"/><line x1="16" x2="22" y1="9" y2="15"/></svg>
+            </span>
         </button>
     </div>
 
@@ -659,8 +661,10 @@
     </section>
 
     <script>
-        // Initialize Lucide Icons
-        lucide.createIcons();
+        // Initialize Lucide Icons Safely
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
 
         // =========================================================================
         // 2. MP3 BACKGROUND MUSIC PLAYER (lagu.mp3) + FALLBACK SYNTH MELODY
@@ -668,6 +672,9 @@
         let isPlayingMusic = false;
         let fallbackAudioCtx = null;
         let fallbackTimer = null;
+
+        const SVG_VOLUME_ON = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rosegold-600"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19.364 18.364a9 9 0 0 0 0-12.728"/></svg>';
+        const SVG_VOLUME_MUTE = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rosegold-500"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><line x1="22" x2="16" y1="9" y2="15"/><line x1="16" x2="22" y1="9" y2="15"/></svg>';
 
         function playFallbackChime() {
             try {
@@ -699,7 +706,7 @@
                     osc.type = 'triangle';
                     osc.frequency.setValueAtTime(n.f, t);
                     gain.gain.setValueAtTime(0.001, t);
-                    gain.gain.linearRampToValueAtTime(0.22, t + 0.02);
+                    gain.gain.linearRampToValueAtTime(0.35, t + 0.02);
                     gain.gain.exponentialRampToValueAtTime(0.001, t + n.d);
                     osc.connect(gain);
                     gain.connect(fallbackAudioCtx.destination);
@@ -731,6 +738,9 @@
         }
 
         function startBirthdayMelody() {
+            isPlayingMusic = true;
+            updateAudioUI();
+
             const audio = document.getElementById('bgMusic');
             if (!audio) {
                 playFallbackChime();
@@ -738,10 +748,10 @@
             }
 
             audio.muted = false;
-            audio.volume = 0.9;
+            audio.volume = 1.0;
 
-            // Jika file lagu.mp3 gagal dimuat (404 / belum ada), otomatis pakai melodi cadangan
-            if (audio.error) {
+            // Jika file lagu.mp3 gagal dimuat atau belum tersedia (networkState === 3 / error)
+            if (audio.error || audio.networkState === 3) {
                 playFallbackChime();
                 return;
             }
@@ -756,6 +766,8 @@
                     console.warn('MP3 gagal diputar, beralih ke melodi bawaan:', err);
                     playFallbackChime();
                 });
+            } else {
+                playFallbackChime();
             }
         }
 
@@ -778,13 +790,9 @@
         }
 
         function updateAudioUI() {
-            const btn = document.getElementById('audioToggleBtn');
-            if (!btn) return;
-
-            btn.innerHTML = isPlayingMusic
-                ? '<i data-lucide="volume-2" class="w-4 h-4 text-rosegold-600"></i>'
-                : '<i data-lucide="volume-x" class="w-4 h-4 text-rosegold-500"></i>';
-            lucide.createIcons();
+            const wrapper = document.getElementById('audioIconWrapper');
+            if (!wrapper) return;
+            wrapper.innerHTML = isPlayingMusic ? SVG_VOLUME_ON : SVG_VOLUME_MUTE;
         }
 
         // Sinkronisasi status ikon speaker dengan elemen <audio id="bgMusic">
@@ -793,12 +801,6 @@
             bgMusicEl.addEventListener('play', () => {
                 isPlayingMusic = true;
                 updateAudioUI();
-            });
-            bgMusicEl.addEventListener('pause', () => {
-                if (!fallbackTimer) {
-                    isPlayingMusic = false;
-                    updateAudioUI();
-                }
             });
             bgMusicEl.addEventListener('error', () => {
                 if (isPlayingMusic) playFallbackChime();
