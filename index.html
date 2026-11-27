@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday Sindy Pramudita ❤️</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts: Playfair Display, Cormorant Garamond, Plus Jakarta Sans, Alex Brush, Caveat & Dancing Script -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Caveat:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Dancing+Script:wght@500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['"Playfair Display"', 'serif'],
+                        script: ['"Cormorant Garamond"', 'serif'],
+                        latin: ['"Dancing Script"', 'cursive'],
+                        signature: ['"Alex Brush"', 'cursive'],
+                        handwriting: ['"Caveat"', 'cursive'],
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        cream: {
+                            50: '#FDFBF7',
+                            100: '#FAF4EB',
+                            200: '#F3E6D5',
+                            300: '#E6D0B5',
+                        },
+                        rosegold: {
+                            100: '#F9ECEC',
+                            200: '#F0D3D3',
+                            300: '#E2B1B1',
+                            400: '#D18E8E',
+                            500: '#B76E79',
+                            600: '#9A545F',
+                            700: '#7D3F49',
+                        },
+                        champagne: '#D4AF37',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Animations & 3D Transforms */
+        body {
+            background: radial-gradient(circle at 50% 30%, #FDFBF7 0%, #F7EDE2 55%, #F2DFD8 100%);
+            color: #4A3B3C;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        /* Floating Ambient Bokeh Particles */
+        .bokeh-particle {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            background: radial-gradient(circle, rgba(255,255,255,0.85) 0%, rgba(212,175,55,0.2) 60%, transparent 100%);
+            animation: floatParticle linear infinite;
+            z-index: 1;
+        }
+
+        /* Floating Hearts Rising Slowly & Looping */
+        .floating-heart {
+            position: fixed;
+            pointer-events: none;
+            color: #D18E8E;
+            filter: drop-shadow(0 2px 6px rgba(183, 110, 121, 0.22));
+            animation: floatHeartUp linear infinite;
+            z-index: 1;
+        }
+
+        @keyframes floatHeartUp {
+            0% {
+                transform: translateY(108vh) translateX(0) rotate(-10deg) scale(0.75);
+                opacity: 0;
+            }
+            15% {
+                opacity: var(--heart-opacity, 0.5);
+            }
+            50% {
+                transform: translateY(50vh) translateX(var(--sway-x, 18px)) rotate(8deg) scale(0.95);
+            }
+            85% {
+                opacity: var(--heart-opacity, 0.5);
+            }
+            100% {
+                transform: translateY(-12vh) translateX(calc(var(--sway-x, 18px) * -0.5)) rotate(-8deg) scale(1.1);
+                opacity: 0;
+            }
+        }
+
+        @keyframes floatParticle {
+            0% {
+                transform: translateY(105vh) scale(0.8);
+                opacity: 0;
+            }
+            20% {
+                opacity: 0.8;
+            }
+            80% {
+                opacity: 0.7;
+            }
+            100% {
+                transform: translateY(-10vh) scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        /* 3D Envelope Styling */
+        .envelope-wrapper {
+            perspective: 1200px;
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .envelope-wrapper:hover:not(.opened) {
+            transform: translateY(-6px) scale(1.02);
+        }
+
+        .envelope-body {
+            position: relative;
+            width: 320px;
+            height: 215px;
+            background: linear-gradient(145deg, #F7E8E1, #EED6CC);
+            border-radius: 12px;
+            box-shadow: 0 22px 45px -10px rgba(154, 84, 95, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+            transform-style: preserve-3d;
+        }
+
+        @media (min-width: 640px) {
+            .envelope-body {
+                width: 380px;
+                height: 250px;
+            }
+        }
+
+        /* Envelope Inner Lining */
+        .envelope-inside {
+            position: absolute;
+            inset: 4px;
+            background: linear-gradient(180deg, #D9B4AB 0%, #EBD4CC 100%);
+            border-radius: 9px;
+            z-index: 1;
+        }
+
+        /* Envelope Top Flap */
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 56%;
+            background: linear-gradient(180deg, #FBF2EE 0%, #EBD2C7 100%);
+            clip-path: polygon(0 0, 100% 0, 50% 100%);
+            transform-origin: top center;
+            transition: transform 0.85s cubic-bezier(0.4, 0, 0.2, 1), z-index 0.2s linear 0.35s;
+            z-index: 5;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            filter: drop-shadow(0 4px 6px rgba(125, 63, 73, 0.15));
+        }
+
+        .envelope-wrapper.opened .envelope-flap {
+            transform: rotateX(180deg);
+            z-index: 1;
+        }
+
+        /* Envelope Left, Right & Bottom Pockets */
+        .envelope-pocket-left {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, #F6E5DE 0%, #EAD1C6 100%);
+            clip-path: polygon(0 0, 52% 52%, 0 100%);
+            border-bottom-left-radius: 12px;
+            border-top-left-radius: 12px;
+            z-index: 3;
+        }
+
+        .envelope-pocket-right {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(225deg, #F6E5DE 0%, #E7CCC0 100%);
+            clip-path: polygon(100% 0, 48% 52%, 100% 100%);
+            border-bottom-right-radius: 12px;
+            border-top-right-radius: 12px;
+            z-index: 3;
+        }
+
+        .envelope-pocket-bottom {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(0deg, #F3DFD6 0%, #FAEEE9 100%);
+            clip-path: polygon(0 100%, 50% 45%, 100% 100%);
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+            z-index: 4;
+            filter: drop-shadow(0 -3px 6px rgba(154, 84, 95, 0.08));
+        }
+
+        /* Wax Seal */
+        .wax-seal {
+            position: absolute;
+            top: 48%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #D47A84, #9E3E4B 70%, #782833 100%);
+            box-shadow: 0 6px 14px rgba(120, 40, 51, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.45), inset 0 -3px 6px rgba(60, 10, 18, 0.5);
+            z-index: 6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.5s ease;
+            border: 2px solid rgba(235, 180, 185, 0.4);
+        }
+
+        .wax-seal::after {
+            content: '';
+            position: absolute;
+            inset: 5px;
+            border-radius: 50%;
+            border: 1px dashed rgba(255, 225, 228, 0.55);
+        }
+
+        .envelope-wrapper.opened .wax-seal {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.5);
+            pointer-events: none;
+        }
+
+        /* Mini Letter Rising inside Envelope */
+        .mini-letter-peek {
+            position: absolute;
+            left: 10%;
+            right: 10%;
+            bottom: 12px;
+            height: 82%;
+            background: #FFFDF9;
+            border-radius: 8px;
+            z-index: 2;
+            transition: transform 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) 0.45s;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.06);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .envelope-wrapper.opened .mini-letter-peek {
+            transform: translateY(-105px);
+        }
+
+        /* Expanded Letter Card Animation */
+        @keyframes letterReveal {
+            0% {
+                opacity: 0;
+                transform: translateY(60px) scale(0.85);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .letter-expanded-anim {
+            animation: letterReveal 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        /* Shimmering Gift Button */
+        .btn-shimmer {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #B76E79 0%, #D18E8E 50%, #B76E79 100%);
+            background-size: 200% auto;
+            transition: all 0.3s ease;
+        }
+
+        .btn-shimmer:hover {
+            background-position: right center;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px -5px rgba(183, 110, 121, 0.5);
+        }
+
+        .btn-shimmer::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -60%;
+            width: 40%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.35);
+            transform: rotate(25deg);
+            animation: shimmerSweep 3s infinite;
+        }
+
+        @keyframes shimmerSweep {
+            0% { left: -60%; }
+            45% { left: 130%; }
+            100% { left: 130%; }
+        }
+
+        /* Gift Box Drop Bounce & Tempting Wobble */
+        @keyframes giftDropBounce {
+            0% {
+                transform: translateY(-100vh) scale(0.7) rotate(-8deg);
+                opacity: 0;
+            }
+            55% {
+                transform: translateY(15px) scale(1.04) rotate(3deg);
+                opacity: 1;
+            }
+            72% {
+                transform: translateY(-18px) scale(0.98) rotate(-2deg);
+            }
+            86% {
+                transform: translateY(6px) scale(1.01) rotate(1deg);
+            }
+            100% {
+                transform: translateY(0) scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+
+        @keyframes giftWobble {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            15% { transform: rotate(-5deg) scale(1.04); }
+            30% { transform: rotate(5deg) scale(1.04); }
+            45% { transform: rotate(-3deg) scale(1.02); }
+            60% { transform: rotate(3deg) scale(1.02); }
+            75% { transform: rotate(0deg) scale(1); }
+        }
+
+        .gift-drop-anim {
+            animation: giftDropBounce 1.15s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+
+        .gift-idle-wobble {
+            animation: giftWobble 2.2s ease-in-out infinite;
+        }
+
+        /* White-Gold Light Flash Transition */
+        @keyframes lightFlashBurst {
+            0% {
+                opacity: 0;
+                transform: scale(0.1);
+            }
+            45% {
+                opacity: 1;
+                transform: scale(1.8);
+            }
+            75% {
+                opacity: 1;
+                transform: scale(2.5);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(3);
+            }
+        }
+
+        .flash-active {
+            animation: lightFlashBurst 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        /* Portrait Polaroid Card Styling */
+        .polaroid-card {
+            transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.45s ease;
+        }
+
+        .polaroid-card:hover {
+            transform: translateY(-8px) scale(1.015);
+            box-shadow: 0 24px 45px -12px rgba(154, 84, 95, 0.28);
+        }
+
+        /* Infinite Seamless Marquee Filmstrip */
+        .marquee-container {
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+            mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+            -webkit-mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+        }
+
+        .marquee-track {
+            display: flex;
+            width: max-content;
+            gap: 1.25rem;
+            animation: scrollMarquee 32s linear infinite;
+        }
+
+        .marquee-container:hover .marquee-track {
+            animation-play-state: paused;
+        }
+
+        @keyframes scrollMarquee {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FAF4EB;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #D18E8E;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="min-h-screen relative antialiased selection:bg-rosegold-200 selection:text-rosegold-700">
+
+    <!-- Floating Ambient Particles Container -->
+    <div id="bokehContainer" class="fixed inset-0 pointer-events-none overflow-hidden z-0"></div>
+
+    <!-- Floating Top Controls (Audio Toggle Only) -->
+    <div class="fixed top-4 right-4 z-50 flex items-center gap-2.5">
+        <button id="audioToggleBtn" onclick="toggleAudio()" title="Putar / Hentikan Musik"
+            class="bg-white/80 hover:bg-white backdrop-blur-md text-rosegold-600 border border-rosegold-200 shadow-sm p-2.5 rounded-full transition-all hover:shadow-md flex items-center justify-center">
+            <i id="audioIcon" data-lucide="volume-x" class="w-4 h-4 text-rosegold-500"></i>
+        </button>
+    </div>
+
+    <!-- Light Flash Overlay for Page Transition -->
+    <div id="lightFlashOverlay" class="fixed inset-0 pointer-events-none z-[100] opacity-0 flex items-center justify-center">
+        <div class="w-[120vmax] h-[120vmax] rounded-full" style="background: radial-gradient(circle, #FFFFFF 0%, #FFF9E6 40%, #F7DFB2 75%, rgba(255,255,255,0) 100%);"></div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- PAGE 1: AMPLOP SURAT, KARTU UCAPAN & KEJUTAN KADO                    -->
+    <!-- ===================================================================== -->
+    <main id="page1" class="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-12 transition-opacity duration-700">
+        
+        <!-- Header Subtle Greeting -->
+        <div id="envelopeHeader" class="text-center mb-10 transition-all duration-700">
+            <h1 class="font-serif text-3xl sm:text-4xl text-rosegold-700 font-semibold tracking-tight">
+                Dear <span id="displayRecipientHeader" class="italic text-rosegold-500">Sindy Pramudita</span>
+            </h1>
+        </div>
+
+        <!-- 3D Interactive Envelope Stage -->
+        <div id="envelopeStage" class="flex flex-col items-center justify-center transition-all duration-700">
+            <div id="envelopeWrapper" onclick="openEnvelope()" class="envelope-wrapper cursor-pointer relative">
+                <div class="envelope-body">
+                    <div class="envelope-inside"></div>
+                    
+                    <!-- Mini Letter inside -->
+                    <div class="mini-letter-peek border border-cream-200">
+                        <div class="w-8 h-1 bg-rosegold-200 rounded-full mb-2"></div>
+                        <p class="font-script italic text-rosegold-500 text-sm">Selamat Ulang Tahun...</p>
+                        <div class="w-full space-y-1.5 mt-3 opacity-40">
+                            <div class="h-1.5 bg-rosegold-300 rounded w-5/6 mx-auto"></div>
+                            <div class="h-1.5 bg-rosegold-300 rounded w-4/6 mx-auto"></div>
+                            <div class="h-1.5 bg-rosegold-300 rounded w-3/4 mx-auto"></div>
+                        </div>
+                    </div>
+
+                    <!-- Envelope Flaps -->
+                    <div class="envelope-pocket-left"></div>
+                    <div class="envelope-pocket-right"></div>
+                    <div class="envelope-pocket-bottom"></div>
+                    <div class="envelope-flap"></div>
+
+                    <!-- Heart Wax Seal -->
+                    <div class="wax-seal group">
+                        <svg class="w-7 h-7 text-cream-50 drop-shadow-sm transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prompt Hint -->
+            <p id="envelopePrompt" class="mt-7 text-sm text-rosegold-600/90 font-medium flex items-center gap-2 animate-pulse">
+                <i data-lucide="mail-open" class="w-4 h-4 text-rosegold-500"></i>
+                <span>Klik untuk membuka surat</span>
+            </p>
+        </div>
+
+        <!-- Expanded Romantic Letter Card (Hidden initially) -->
+        <div id="letterCardContainer" class="hidden w-full max-w-xl mx-auto">
+            <div class="letter-expanded-anim bg-[#FFFDF9] border border-rosegold-200/80 rounded-3xl p-6 sm:p-10 shadow-[0_25px_60px_-15px_rgba(154,84,95,0.22)] relative overflow-hidden">
+                <!-- Decorative Corner Florals / Ornaments -->
+                <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-rosegold-100/70 to-transparent rounded-bl-full pointer-events-none"></div>
+                <div class="absolute bottom-0 left-0 w-28 h-28 bg-gradient-to-tr from-cream-200/60 to-transparent rounded-tr-full pointer-events-none"></div>
+
+                <!-- Letter Header -->
+                <div class="text-center border-b border-rosegold-100 pb-5 mb-6 relative">
+                    <div class="inline-flex items-center justify-center w-11 h-11 rounded-full bg-rosegold-100 text-rosegold-500 mb-3">
+                        <i data-lucide="heart" class="w-5 h-5 fill-rosegold-400"></i>
+                    </div>
+                    <h2 class="font-latin text-3xl sm:text-4xl text-rosegold-700 font-bold tracking-wide">
+                        Happy Birthday <span id="displayRecipientLetter" class="text-rosegold-500">Sindy Pramudita</span> ❤️
+                    </h2>
+                </div>
+
+                <!-- Letter Body Content -->
+                <div id="displayLetterBody" class="font-latin text-2xl sm:text-[26px] leading-relaxed text-[#4E3D3E] space-y-4 text-center">
+                    <p class="font-semibold text-rosegold-600">Selamat ulang tahun untuk wanita paling cantik</p>
+                    <p>Untukmu yang senyumnya seindah bunga, yang tawa nya semerdu rintik hujan. Parasmu yang menawan membuat mata tidak pernah beralih darimu. Kehadiranmu selalu memberikan kehangatan, tawa, dan warna. Bersamamu, hal hal sederhana terasa begitu sangat istimewa</p>
+                    <p class="text-rosegold-600">Doaku untukmu di usia yang baru ini, semoga semesta selalu memelukmu dengan kebahagiaan, semoga kamu selalu diberikan kesehatan yang melimpah, selalu dimudahkan setiap langkah dalam meraih setiap mimpi, dan hati yang selalu dipenuhi kedamaian.</p>
+                </div>
+
+                <!-- Signature & CTA Button -->
+                <div class="mt-7 pt-4 border-t border-rosegold-100/80 flex flex-col items-center justify-center gap-4 text-center">
+                    <div class="text-center">
+                        <p class="font-latin text-xl text-rosegold-400">dari</p>
+                        <p id="displaySenderName" class="font-latin text-3xl text-rosegold-700 font-bold -mt-1">M</p>
+                    </div>
+
+                    <!-- Accept Gift CTA Button -->
+                    <button onclick="triggerGiftDrop()" class="btn-shimmer text-white font-medium px-6 py-3.5 rounded-full shadow-lg flex items-center gap-2 text-sm sm:text-base cursor-pointer">
+                        <span>Terima Hadiah</span>
+                        <span class="text-lg">🎁</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gift Box Drop Modal Overlay (Hidden initially) -->
+        <div id="giftStageOverlay" class="fixed inset-0 z-40 hidden flex-col items-center justify-center bg-[#3A2628]/45 backdrop-blur-sm px-4">
+            <div id="giftBoxContainer" onclick="openGiftBox()" class="cursor-pointer flex flex-col items-center group">
+                <!-- Custom Illustrated Luxury 3D-style Gift Box SVG -->
+                <div id="giftBoxVisual" class="gift-idle-wobble relative w-48 h-48 sm:w-56 sm:h-56 flex items-center justify-center drop-shadow-[0_25px_35px_rgba(125,63,73,0.45)] transition-transform duration-300 group-hover:scale-105">
+                    <!-- Soft Glow Behind Gift -->
+                    <div class="absolute inset-4 bg-amber-200/50 rounded-full blur-2xl animate-pulse"></div>
+                    
+                    <svg viewBox="0 0 220 220" class="w-full h-full relative z-10 overflow-visible">
+                        <defs>
+                            <linearGradient id="boxBodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#F7DFD9"/>
+                                <stop offset="50%" stop-color="#E7B8B0"/>
+                                <stop offset="100%" stop-color="#D1948C"/>
+                            </linearGradient>
+                            <linearGradient id="boxLidGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#FFF2EE"/>
+                                <stop offset="100%" stop-color="#E8BCB4"/>
+                            </linearGradient>
+                            <linearGradient id="goldRibbon" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#F5DF99"/>
+                                <stop offset="45%" stop-color="#D4AF37"/>
+                                <stop offset="100%" stop-color="#AA8220"/>
+                            </linearGradient>
+                            <linearGradient id="roseRibbon" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#C96E7B"/>
+                                <stop offset="100%" stop-color="#96424F"/>
+                            </linearGradient>
+                        </defs>
+
+                        <!-- Box Main Body -->
+                        <rect x="40" y="92" width="140" height="105" rx="14" fill="url(#boxBodyGrad)" stroke="#FFF5F2" stroke-width="2"/>
+                        <!-- Shadow under lid -->
+                        <rect x="40" y="92" width="140" height="12" fill="rgba(125, 63, 73, 0.18)"/>
+
+                        <!-- Vertical Ribbon on Body -->
+                        <rect x="96" y="92" width="28" height="105" fill="url(#roseRibbon)"/>
+                        <rect x="100" y="92" width="4" height="105" fill="url(#goldRibbon)" opacity="0.85"/>
+                        <rect x="116" y="92" width="4" height="105" fill="url(#goldRibbon)" opacity="0.85"/>
+
+                        <!-- Box Lid -->
+                        <rect x="30" y="64" width="160" height="32" rx="10" fill="url(#boxLidGrad)" stroke="#FFFFFF" stroke-width="2"/>
+                        <!-- Vertical Ribbon on Lid -->
+                        <rect x="96" y="64" width="28" height="32" fill="url(#roseRibbon)"/>
+                        <rect x="100" y="64" width="4" height="32" fill="url(#goldRibbon)" opacity="0.85"/>
+                        <rect x="116" y="64" width="4" height="32" fill="url(#goldRibbon)" opacity="0.85"/>
+
+                        <!-- Luxury Ribbon Bow -->
+                        <!-- Left Loop -->
+                        <path d="M108 64 C75 20, 42 42, 72 64 Z" fill="url(#roseRibbon)" stroke="url(#goldRibbon)" stroke-width="2.5"/>
+                        <!-- Right Loop -->
+                        <path d="M112 64 C145 20, 178 42, 148 64 Z" fill="url(#roseRibbon)" stroke="url(#goldRibbon)" stroke-width="2.5"/>
+                        <!-- Bow Center Knot -->
+                        <rect x="98" y="50" width="24" height="18" rx="7" fill="url(#goldRibbon)"/>
+
+                        <!-- Sparkle Stars around Gift -->
+                        <path d="M25 45 L28 53 L36 56 L28 59 L25 67 L22 59 L14 56 L22 53 Z" fill="#FFF3C4"/>
+                        <path d="M192 38 L194 44 L200 46 L194 48 L192 54 L190 48 L184 46 L190 44 Z" fill="#FFF3C4"/>
+                        <circle cx="185" cy="115" r="3.5" fill="#FFE699"/>
+                        <circle cx="32" cy="130" r="3" fill="#FFE699"/>
+                    </svg>
+                </div>
+
+                <!-- Tempting Click Prompt -->
+                <div class="mt-4 bg-white/95 backdrop-blur-md px-6 py-2.5 rounded-full shadow-xl border border-rosegold-200 flex items-center gap-2 animate-bounce">
+                    <span class="text-base">✨</span>
+                    <span class="font-serif font-semibold text-rosegold-700 text-base sm:text-lg">Klik kadonya!</span>
+                    <span class="text-base">✨</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ===================================================================== -->
+    <!-- PAGE 2: GALERI KENANGAN, KARTU UCAPAN & INFINITE FILMSTRIP MARQUEE    -->
+    <!-- ===================================================================== -->
+    <section id="page2" class="hidden relative z-10 min-h-screen flex flex-col justify-between pt-12 pb-8 opacity-0 transition-opacity duration-1000">
+        
+        <div class="max-w-6xl mx-auto w-full px-4 sm:px-6">
+            <!-- Page 2 Header -->
+            <div class="text-center max-w-2xl mx-auto mb-10 sm:mb-14">
+                <h1 class="font-serif text-3xl sm:text-5xl text-rosegold-700 font-bold leading-tight">
+                    Happy Birthday<br>
+                    <span id="displayRecipientPage2" class="italic text-rosegold-500">Sindy Pramudita ❤️🥰🌹</span>
+                </h1>
+                <p class="mt-3 text-sm sm:text-base text-rosegold-600/90 font-normal">
+                    Menatap senyum indahmu selalu menjadi candu bagiku
+                </p>
+            </div>
+
+            <!-- Hidden single photo input for clicking individual frames -->
+            <input type="file" id="singlePhotoInput" accept="image/*" class="hidden" onchange="handleSinglePhotoUpload(event)">
+
+            <!-- Featured Portrait Polaroid Cards (4 Photos Grid) -->
+            <div id="polaroidGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-7 max-w-6xl mx-auto mb-14">
+                <!-- Portrait Polaroid Cards injected by JS -->
+            </div>
+        </div>
+
+        <!-- Bottom Infinite Seamless Photo Filmstrip Marquee -->
+        <div class="w-full mt-4 pt-6 border-t border-rosegold-200/60 bg-white/40 backdrop-blur-xs">
+            <div class="max-w-6xl mx-auto px-4 mb-4 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="film" class="w-4 h-4 text-rosegold-500"></i>
+                    <h3 class="font-serif text-lg sm:text-xl text-rosegold-700 font-semibold">Jejak Momen Bahagia</h3>
+                </div>
+                <span class="text-xs text-rosegold-500 italic">Arahkan kursor untuk berhenti sejenak</span>
+            </div>
+
+            <div class="marquee-container py-3">
+                <div id="marqueeTrack" class="marquee-track">
+                    <!-- Seamless duplicated photo strip items injected via JS -->
+                </div>
+            </div>
+
+            <footer class="text-center mt-6 text-xs text-rosegold-500/80">
+                Dibuat dengan penuh cinta khusus untuk merayakan hari kelahiranmu ♥
+            </footer>
+        </div>
+    </section>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // =========================================================================
+        // 1. AMBIENT BOKEH PARTICLES & FLOATING HEARTS GENERATOR
+        // =========================================================================
+        function createBokehParticles() {
+            const container = document.getElementById('bokehContainer');
+            if (!container) return;
+            const count = 14;
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'bokeh-particle';
+                const size = Math.random() * 60 + 20;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${Math.random() * 100}vw`;
+                particle.style.animationDuration = `${Math.random() * 14 + 12}s`;
+                particle.style.animationDelay = `${Math.random() * 10}s`;
+                container.appendChild(particle);
+            }
+
+            // Generate slow rising looping hearts
+            const heartColors = ['#E2B1B1', '#D18E8E', '#B76E79', '#F0C4C4', '#D4AF37'];
+            const heartCount = 22;
+            for (let i = 0; i < heartCount; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'floating-heart';
+                const size = Math.random() * 18 + 12; // 12px - 30px
+                const color = heartColors[Math.floor(Math.random() * heartColors.length)];
+                const duration = Math.random() * 14 + 16; // 16s - 30s (pelan & lembut)
+                const delay = -(Math.random() * duration); // langsung tersebar merata di layar sejak awal
+                const sway = (Math.random() * 40 - 20).toFixed(0);
+                const maxOpacity = (Math.random() * 0.35 + 0.25).toFixed(2);
+
+                heart.style.left = `${Math.random() * 98}vw`;
+                heart.style.width = `${size}px`;
+                heart.style.height = `${size}px`;
+                heart.style.color = color;
+                heart.style.setProperty('--sway-x', `${sway}px`);
+                heart.style.setProperty('--heart-opacity', maxOpacity);
+                heart.style.animationDuration = `${duration}s`;
+                heart.style.animationDelay = `${delay}s`;
+
+                heart.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="currentColor" class="w-full h-full">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    </svg>
+                `;
+                container.appendChild(heart);
+            }
+        }
+        createBokehParticles();
+
+        // =========================================================================
+        // 2. WEB AUDIO API: MUSIC BOX MELODY ("HAPPY BIRTHDAY TO YOU")
+        // =========================================================================
+        let audioCtx = null;
+        let isPlayingMusic = false;
+        let melodyTimeout = null;
+        let activeOscillators = [];
+
+        const happyBirthdayNotes = [
+            // "Hap-py Birth-day to you"
+            { freq: 261.63, dur: 0.35 }, { freq: 261.63, dur: 0.25 }, { freq: 293.66, dur: 0.6 },
+            { freq: 261.63, dur: 0.6 },  { freq: 349.23, dur: 0.6 },  { freq: 329.63, dur: 1.1 },
+            // "Hap-py Birth-day to you"
+            { freq: 261.63, dur: 0.35 }, { freq: 261.63, dur: 0.25 }, { freq: 293.66, dur: 0.6 },
+            { freq: 261.63, dur: 0.6 },  { freq: 392.00, dur: 0.6 },  { freq: 349.23, dur: 1.1 },
+            // "Hap-py Birth-day dear [Name]"
+            { freq: 261.63, dur: 0.35 }, { freq: 261.63, dur: 0.25 }, { freq: 523.25, dur: 0.6 },
+            { freq: 440.00, dur: 0.6 },  { freq: 349.23, dur: 0.6 },  { freq: 329.63, dur: 0.6 },
+            { freq: 293.66, dur: 1.1 },
+            // "Hap-py Birth-day to you"
+            { freq: 466.16, dur: 0.35 }, { freq: 466.16, dur: 0.25 }, { freq: 440.00, dur: 0.6 },
+            { freq: 349.23, dur: 0.6 },  { freq: 392.00, dur: 0.6 },  { freq: 349.23, dur: 1.4 }
+        ];
+
+        function playMusicBoxNote(freq, startTime, duration) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const overtone = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, startTime);
+
+            overtone.type = 'triangle';
+            overtone.frequency.setValueAtTime(freq * 2, startTime);
+
+            const overtoneGain = audioCtx.createGain();
+            overtoneGain.gain.setValueAtTime(0.06, startTime);
+            overtoneGain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration * 0.8);
+
+            gainNode.gain.setValueAtTime(0.001, startTime);
+            gainNode.gain.linearRampToValueAtTime(0.22, startTime + 0.03);
+            gainNode.gain.exponentialRampToValueAtTime(0.0008, startTime + duration * 1.15);
+
+            osc.connect(gainNode);
+            overtone.connect(overtoneGain);
+            overtoneGain.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            osc.start(startTime);
+            overtone.start(startTime);
+            osc.stop(startTime + duration * 1.2);
+            overtone.stop(startTime + duration * 1.2);
+
+            activeOscillators.push(osc, overtone);
+        }
+
+        function startBirthdayMelody() {
+            try {
+                if (!audioCtx) {
+                    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                    audioCtx = new AudioContextClass();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                isPlayingMusic = true;
+                updateAudioUI();
+
+                let currentTime = audioCtx.currentTime + 0.1;
+                let totalDuration = 0;
+
+                happyBirthdayNotes.forEach(note => {
+                    playMusicBoxNote(note.freq, currentTime, note.dur);
+                    currentTime += note.dur + 0.06;
+                    totalDuration += note.dur + 0.06;
+                });
+
+                melodyTimeout = setTimeout(() => {
+                    if (isPlayingMusic) {
+                        startBirthdayMelody();
+                    }
+                }, (totalDuration + 1.2) * 1000);
+            } catch (err) {
+                console.warn('Web Audio API tidak didukung:', err);
+            }
+        }
+
+        function stopBirthdayMelody() {
+            isPlayingMusic = false;
+            if (melodyTimeout) clearTimeout(melodyTimeout);
+            activeOscillators.forEach(osc => {
+                try { osc.stop(); } catch (e) {}
+            });
+            activeOscillators = [];
+            updateAudioUI();
+        }
+
+        function toggleAudio() {
+            if (isPlayingMusic) {
+                stopBirthdayMelody();
+            } else {
+                startBirthdayMelody();
+            }
+        }
+
+        function updateAudioUI() {
+            const btn = document.getElementById('audioToggleBtn');
+            if (!btn) return;
+            btn.innerHTML = isPlayingMusic
+                ? '<i data-lucide="volume-2" class="w-4 h-4 text-rosegold-600"></i>'
+                : '<i data-lucide="volume-x" class="w-4 h-4 text-rosegold-500"></i>';
+            lucide.createIcons();
+        }
+
+        // =========================================================================
+        // 3. PAGE 1 INTERACTION FLOW (ENVELOPE -> CONFETTI & SONG -> LETTER -> GIFT)
+        // =========================================================================
+        let isEnvelopeOpened = false;
+
+        function fireRomanticConfetti() {
+            if (typeof confetti !== 'function') return;
+            const colors = ['#E2B1B1', '#B76E79', '#D4AF37', '#FFF5E4', '#F4C2C2'];
+            confetti({
+                particleCount: 85,
+                spread: 80,
+                origin: { y: 0.58 },
+                colors: colors,
+                scalar: 1.05
+            });
+
+            setTimeout(() => {
+                confetti({
+                    particleCount: 45,
+                    angle: 60,
+                    spread: 65,
+                    origin: { x: 0.1, y: 0.65 },
+                    colors: colors
+                });
+                confetti({
+                    particleCount: 45,
+                    angle: 120,
+                    spread: 65,
+                    origin: { x: 0.9, y: 0.65 },
+                    colors: colors
+                });
+            }, 350);
+        }
+
+        function openEnvelope() {
+            if (isEnvelopeOpened) return;
+            isEnvelopeOpened = true;
+
+            const wrapper = document.getElementById('envelopeWrapper');
+            const prompt = document.getElementById('envelopePrompt');
+            wrapper.classList.add('opened');
+            prompt.style.opacity = '0';
+
+            // Mulai putar lagu Selamat Ulang Tahun & ledakkan konfetti
+            startBirthdayMelody();
+            setTimeout(() => {
+                fireRomanticConfetti();
+            }, 400);
+
+            // Munculkan kartu surat ucapan penuh setelah animasi amplop terbuka
+            setTimeout(() => {
+                const envelopeStage = document.getElementById('envelopeStage');
+                const envelopeHeader = document.getElementById('envelopeHeader');
+                const letterCard = document.getElementById('letterCardContainer');
+
+                envelopeStage.style.opacity = '0';
+                envelopeHeader.style.opacity = '0';
+
+                setTimeout(() => {
+                    envelopeStage.classList.add('hidden');
+                    envelopeHeader.classList.add('hidden');
+                    letterCard.classList.remove('hidden');
+                }, 450);
+            }, 1350);
+        }
+
+        function triggerGiftDrop() {
+            const giftOverlay = document.getElementById('giftStageOverlay');
+            const giftContainer = document.getElementById('giftBoxContainer');
+
+            giftOverlay.classList.remove('hidden');
+            giftOverlay.classList.add('flex');
+
+            // Reset & jalankan animasi kado jatuh dari atas
+            giftContainer.classList.remove('gift-drop-anim');
+            void giftContainer.offsetWidth;
+            giftContainer.classList.add('gift-drop-anim');
+        }
+
+        function openGiftBox() {
+            const flashOverlay = document.getElementById('lightFlashOverlay');
+            const giftOverlay = document.getElementById('giftStageOverlay');
+            const page1 = document.getElementById('page1');
+            const page2 = document.getElementById('page2');
+
+            // Ledakan kilatan cahaya putih-emas
+            flashOverlay.classList.remove('flash-active');
+            void flashOverlay.offsetWidth;
+            flashOverlay.classList.add('flash-active');
+
+            // Perayaan konfetti tambahan saat berpindah ke Halaman 2
+            setTimeout(() => {
+                fireRomanticConfetti();
+            }, 550);
+
+            // Perpindahan mulus ke Halaman 2 di puncak kilatan cahaya
+            setTimeout(() => {
+                giftOverlay.classList.add('hidden');
+                giftOverlay.classList.remove('flex');
+                page1.classList.add('hidden');
+
+                page2.classList.remove('hidden');
+                void page2.offsetWidth;
+                page2.classList.remove('opacity-0');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 720);
+        }
+
+        function backToEnvelope() {
+            const page1 = document.getElementById('page1');
+            const page2 = document.getElementById('page2');
+
+            page2.classList.add('opacity-0');
+            setTimeout(() => {
+                page2.classList.add('hidden');
+                page1.classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 500);
+        }
+
+        // =========================================================================
+        // 4. PAGE 2 DATA: FEATURED PORTRAIT POLAROIDS & INFINITE MARQUEE GALLERY
+        // =========================================================================
+        const featuredMemories = [
+            {
+                id: 0,
+                marqueeIndex: 1,
+                image: 'Polaroid 1.jpg',
+                caption: 'Di bawah teduh dedaunan dan cahaya mentari sore, siluet anggunmu menatap jauh seindah lukisan semesta'
+            },
+            {
+                id: 1,
+                marqueeIndex: -1,
+                image: 'Polaroid 2.jpeg',
+                caption: 'Hangat cahaya senja membingkai tatapan teduhmu, menghadirkan keindahan yang seketika membuat dunia berhenti berputar'
+            },
+            {
+                id: 2,
+                marqueeIndex: -1,
+                image: 'Polaroid 3.jpeg',
+                caption: 'Dalam lembut tatapmu dan pose penuh pesona, kecantikanmu memancarkan keanggunan yang tak pernah habis untuk dikagumi'
+            },
+            {
+                id: 3,
+                marqueeIndex: -1,
+                image: 'Polaroid 4.jpeg',
+                caption: 'Secangkir matcha manis di tanganmu tak pernah sanggup menandingi manisnya senyum ceria yang menghangatkan hariku'
+            }
+        ];
+
+        let marqueePhotos = [
+            { url: 'Slideshow (1).jpeg', label: 'Di balik lensa kacamata bundar itu, sorot matamu menyimpan keteduhan yang selalu membuatku betah menatapmu' },
+            { url: 'Slideshow (2).jpg', label: 'Di bawah birunya langit dan arakan awan putih, langkah anggunmu seakan menjadi pusat dari indahnya semesta' },
+            { url: 'Slideshow (3).jpeg', label: 'Dalam balutan hitam yang menawan, setiap gerak tubuhmu memancarkan pesona yang tak pernah gagal memikat hati' },
+            { url: 'Slideshow (4).jpeg', label: 'Bahkan di tengah cahaya poster bioskop, keanggunanmu tetap menjadi pemeran utama yang mencuri seluruh perhatian' },
+            { url: 'Slideshow (5).jpg', label: 'Di bawah gemerlap panggung malam itu, paras manismu bersinar jauh lebih terang dari sorot lampu mana pun' },
+            { url: 'Slideshow (6).jpg', label: 'Malam yang riuh terasa begitu syahdu saat menatapmu berdiri anggun dengan pesona yang menenangkan jiwa' },
+            { url: 'Slideshow (7).jpg', label: 'Pantulan cermin itu merekam keanggunanmu yang paripurna, manis dan teduh dalam balutan hijab hitam' },
+            { url: 'Slideshow (8).jpg', label: 'Tatapan lembut dan rona pipi manismu menjadikan momen sederhana ini terasa begitu istimewa untuk dikenang' }
+        ];
+
+        let activeUploadTarget = null;
+// ... existing code ... -->
